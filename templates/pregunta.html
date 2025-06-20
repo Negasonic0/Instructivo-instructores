@@ -1,55 +1,34 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Avi – Asistente SENA</title>
-  <style>
-    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
-    #chat { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
-    .message { margin: 10px 0; }
-    .bot { color: green; }
-    .user { text-align: right; color: blue; }
-    input { width: 80%; padding: 10px; }
-    button { padding: 10px 20px; }
-  </style>
-</head>
-<body>
-
-<div id="chat">
-  <div class="message bot">👋 Hola, soy Avi. ¿Qué ocurrió con el aprendiz o el caso disciplinario?</div>
-</div>
-
-<div style="text-align: center; margin-top: 10px;">
-  <input type="text" id="userInput" placeholder="Escribe aquí..." />
-  <button onclick="enviarMensaje()">Enviar</button>
-</div>
-
 <script>
-function enviarMensaje() {
+async function enviarMensaje() {
   const input = document.getElementById("userInput");
   const mensaje = input.value.trim();
   if (!mensaje) return;
 
   const chat = document.getElementById("chat");
-
-  // Mostrar mensaje del usuario
   chat.innerHTML += `<div class="message user">${mensaje}</div>`;
-
-  // Simular respuesta del bot
-  let respuesta = "";
-
-  if (mensaje.toLowerCase().includes("dos llamados")) {
-    respuesta = "📘 Parece que debes aplicar un Plan de Mejoramiento Académico. Este se usa cuando el aprendiz no ha mejorado tras dos llamados. Los pasos son: ...";
-  } else if (mensaje.toLowerCase().includes("conducta irregular")) {
-    respuesta = "⚠️ En casos de conducta irregular, se debe aplicar el protocolo disciplinario. Primero se evalúa la gravedad y luego...";
-  } else {
-    respuesta = "🤔 Estoy analizando tu caso. Por ahora, revisa el instructivo completo para más detalles.";
-  }
-
-  chat.innerHTML += `<div class="message bot">${respuesta}</div>`;
   input.value = "";
+
+  // Mostrar "pensando..."
+  const loading = document.createElement("div");
+  loading.className = "message bot";
+  loading.innerText = "🤖 Pensando...";
+  chat.appendChild(loading);
+  
+
+  // Llamar a Flask con el mensaje
+  const res = await fetch("http://localhost:5000/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: mensaje })
+  });
+
+  const data = await res.json();
+  loading.remove();
+
+  if (data.response) {
+    chat.innerHTML += `<div class="message bot">${data.response}</div>`;
+  } else {
+    chat.innerHTML += `<div class="message bot">❌ Error: ${data.error}</div>`;
+  }
 }
 </script>
-
-</body>
-</html>
