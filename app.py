@@ -6,4 +6,7 @@ app.secret_key = 'clave-secreta'  # Necesaria para sesiones y flash
 # Ruta principal
 @app.route('/', methods=['GET', 'POST'])
 def Main():
-    return render_template('main.html')
+    return render_template('pregunta.html')
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5004)
